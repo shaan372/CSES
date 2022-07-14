@@ -55,38 +55,35 @@ int fast_mul(int x, int y){if (x == 0) return 0; else if (x % 2 == 1) return (fa
 
 
 /*-----------------------------------ACTUAL CODE STARTS HERE-----------------------------------------------------*/
+vector<ll> z_function(string s)
+{
+    ll n = s.length();
+    vector<ll> z(n);
+    for (ll i = 1, l = 0, r = 0; i < n; ++i)
+    {
+        if (i <= r)
+            z[i] = min(r - i + 1, z[i - l]);
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]])
+            ++z[i];
+        if (i + z[i] - 1 > r)
+            l = i, r = i + z[i] - 1;
+    }
+    return z;
+}
 
 int main(int argc, char const *argv[])
 {
     fast_io;
     fast_io2;
-    ll n, m;
-    cin >> n >> m;
-    vector<ll> v(n);
-    for (auto &i : v)
-        cin >> i;
-    vector<vector<ll>> dp(n, vector<ll>(m + 2, 0));
-    for (ll i = 1; i <= m; i++)
-    {
-        if (v[0] == i || v[0] == 0)
-            dp[0][i] = 1;
-    }
+    string s;
+    cin >> s;
+    auto v = z_function(s);
+    ll n = v.size();
     for (ll i = 1; i < n; i++)
     {
-        for (ll j = 1; j <= m; j++)
-        {
-            if (v[i] == j || v[i] == 0)
-            {
-                if (j == 1)
-                    dp[i][j] = (dp[i - 1][1] % M + dp[i - 1][2] % M) % M;
-                else
-                    dp[i][j] = (dp[i - 1][j - 1] % M + dp[i - 1][j] % M + dp[i - 1][j + 1] % M) % M;
-            }
-        }
+        if (v[i] + i == n)
+            cout << i << " ";
     }
-    ll ans = 0;
-    for (ll i = 1; i <= m; i++)
-        ans = (ans % M + dp[n - 1][i] % M) % M;
-    cout << ans << nl;
+    cout << n << nl;
     return 0;
 }

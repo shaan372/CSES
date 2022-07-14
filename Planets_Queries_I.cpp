@@ -55,38 +55,34 @@ int fast_mul(int x, int y){if (x == 0) return 0; else if (x % 2 == 1) return (fa
 
 
 /*-----------------------------------ACTUAL CODE STARTS HERE-----------------------------------------------------*/
-
+int dp[200005][32];
 int main(int argc, char const *argv[])
 {
     fast_io;
     fast_io2;
-    ll n, m;
-    cin >> n >> m;
-    vector<ll> v(n);
-    for (auto &i : v)
-        cin >> i;
-    vector<vector<ll>> dp(n, vector<ll>(m + 2, 0));
-    for (ll i = 1; i <= m; i++)
+    ll n, q;
+    cin >> n >> q;
+    for (ll i = 1; i <= n; i++)
+        cin >> dp[i][0];
+    for (ll j = 1; j <= 31; j++)
     {
-        if (v[0] == i || v[0] == 0)
-            dp[0][i] = 1;
-    }
-    for (ll i = 1; i < n; i++)
-    {
-        for (ll j = 1; j <= m; j++)
+        for (ll i = 1; i <= n; i++)
         {
-            if (v[i] == j || v[i] == 0)
-            {
-                if (j == 1)
-                    dp[i][j] = (dp[i - 1][1] % M + dp[i - 1][2] % M) % M;
-                else
-                    dp[i][j] = (dp[i - 1][j - 1] % M + dp[i - 1][j] % M + dp[i - 1][j + 1] % M) % M;
-            }
+            ll v = dp[i][j - 1];
+            dp[i][j] = dp[v][j - 1];
         }
     }
-    ll ans = 0;
-    for (ll i = 1; i <= m; i++)
-        ans = (ans % M + dp[n - 1][i] % M) % M;
-    cout << ans << nl;
+    while (q--)
+    {
+        ll x, k, j;
+        cin >> x >> k;
+        while (k > 0)
+        {
+            j = log2(k);
+            x = dp[x][j];
+            k = k - (1 << j);
+        }
+        cout << x << nl;
+    }
     return 0;
 }

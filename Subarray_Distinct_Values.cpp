@@ -60,33 +60,29 @@ int main(int argc, char const *argv[])
 {
     fast_io;
     fast_io2;
-    ll n, m;
-    cin >> n >> m;
+
+    ll n, k;
+    cin >> n >> k;
     vector<ll> v(n);
     for (auto &i : v)
         cin >> i;
-    vector<vector<ll>> dp(n, vector<ll>(m + 2, 0));
-    for (ll i = 1; i <= m; i++)
-    {
-        if (v[0] == i || v[0] == 0)
-            dp[0][i] = 1;
-    }
-    for (ll i = 1; i < n; i++)
-    {
-        for (ll j = 1; j <= m; j++)
-        {
-            if (v[i] == j || v[i] == 0)
-            {
-                if (j == 1)
-                    dp[i][j] = (dp[i - 1][1] % M + dp[i - 1][2] % M) % M;
-                else
-                    dp[i][j] = (dp[i - 1][j - 1] % M + dp[i - 1][j] % M + dp[i - 1][j + 1] % M) % M;
-            }
-        }
-    }
+    ll i = 0, j = 0;
+    map<ll, ll> m;
     ll ans = 0;
-    for (ll i = 1; i <= m; i++)
-        ans = (ans % M + dp[n - 1][i] % M) % M;
+    while (j < n)
+    {
+        m[v[j]]++;
+        while (i <= j && m.size() > k)
+        {
+            m[v[i]]--;
+            if (m[v[i]] == 0)
+                m.erase(v[i]);
+            i++;
+        }
+        if (m.size() <= k)
+            ans += (j - i + 1);
+        j++;
+    }
     cout << ans << nl;
     return 0;
 }
