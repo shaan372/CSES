@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 
 #define ll long long
+#define ull unsigned long long
 #define vi vector<ll>
 #define gi greater<ll>
 #define maxheap priority_queue<ll>
@@ -22,7 +23,7 @@
 #define fast_io ios_base::sync_with_stdio(false);cin.tie(NULL)
 #define fast_io2 cin.exceptions(cin.failbit);
 #define M 1000000007
-#define inf 1e18
+#define inf 9223372036854775807
 #define MOD 998244353
 #define nl endl
 
@@ -46,6 +47,8 @@ ll mod_sub(ll a, ll b, ll m) {a = a % m; b = b % m; return (((a - b) % m) + m) %
 ll mod_div(ll a, ll b, ll m) {a = a % m; b = b % m; return (mod_mul(a, mminvprime(b, m), m) + m) % m;}
 ll phin(ll n) {ll number = n; if (n % 2 == 0) {number /= 2; while (n % 2 == 0) n /= 2;} for (ll i = 3; i <= sqrt(n); i += 2) {if (n % i == 0) {while (n % i == 0)n /= i; number = (number / i * (i - 1));}} if (n > 1)number = (number / n * (n - 1)) ; return number;}//O(sqrt(N))
 bool isPrime(int n){if (n <= 1) return false; for (int i = 2; i < n; i++)if (n % i == 0) return false; return true;}
+int binExpo(int a, int b){ if(b==0) return 1;if(b==1) return a; int r = binExpo(a, b/2); if(b%2==0) return (r%M * r%M)%M; else return (r%M*r%M*a%M)%M;}
+int fast_mul(int x, int y){if (x == 0) return 0; else if (x % 2 == 1) return (fast_mul(x >> 1, y << 1) + y); else return fast_mul(x >> 1, y << 1);}
 
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -65,15 +68,30 @@ void build(vector<ll> &v, vector<ll> &seg, ll i, ll l, ll r)
     build(v, seg, 2 * i + 2, m + 1, r);
     seg[i] = min(seg[2 * i + 1], seg[2 * i + 2]);
 }
+void update(vector<ll> &v, vector<ll> &seg, ll i, ll j, ll k, ll l, ll r)
+{
+    if (l == r)
+    {
+        if (l == k)
+            seg[i] = j;
+        return;
+    }
+    if (k < l || k > r)
+        return;
+    ll m = (l + r) >> 1;
+    update(v, seg, 2 * i + 1, j, k, l, m);
+    update(v, seg, 2 * i + 2, j, k, m + 1, r);
+    seg[i] = min(seg[2 * i + 1], seg[2 * i + 2]);
+}
 ll solve(vector<ll> &v, vector<ll> &seg, ll i, ll l, ll r, ll low, ll high)
 {
     if (l >= low && r <= high)
         return seg[i];
     if (r < low || l > high)
         return INT_MAX;
-    ll mid = (l + r) >> 1;
-    ll left = solve(v, seg, 2 * i + 1, l, mid, low, high);
-    ll right = solve(v, seg, 2 * i + 2, mid + 1, r, low, high);
+    ll m = (l + r) >> 1;
+    ll left = solve(v, seg, 2 * i + 1, l, m, low, high);
+    ll right = solve(v, seg, 2 * i + 2, m + 1, r, low, high);
     return min(left, right);
 }
 int main(int argc, char const *argv[])
@@ -82,16 +100,18 @@ int main(int argc, char const *argv[])
     fast_io2;
     ll n, q;
     cin >> n >> q;
-    vector<ll> v(n), seg(4 * n + 1, 0);
+    vector<ll> v(n), seg(4 * n + 5, 0);
     for (auto &i : v)
         cin >> i;
     build(v, seg, 0, 0, n - 1);
     while (q--)
     {
-        ll l, r;
-        cin >> l >> r;
-        ll ans = solve(v, seg, 0, 0, n - 1, l - 1, r - 1);
-        cout << ans << nl;
+        ll x, a, b;
+        cin >> x >> a >> b;
+        if (x == 1)
+            update(v, seg, 0, b, a - 1, 0, n - 1);
+        else
+            cout << solve(v, seg, 0, 0, n - 1, a - 1, b - 1) << nl;
     }
     return 0;
 }
