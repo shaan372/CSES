@@ -56,13 +56,77 @@ int fast_mul(int x, int y){if (x == 0) return 0; else if (x % 2 == 1) return (fa
 
 /*-----------------------------------ACTUAL CODE STARTS HERE-----------------------------------------------------*/
 
+struct node
+{
+    ll val, ind;
+};
+void build(ll l, ll r, ll i, vector<ll> &v, vector<node> &seg)
+{
+    if (l == r)
+    {
+        seg[i].ind = l;
+        seg[i].val = v[l];
+        return;
+    }
+    ll mid = (l + r) >> 1;
+    build(l, mid, 2 * i + 1, v, seg);
+    build(mid + 1, r, 2 * i + 2, v, seg);
+    if (seg[2 * i + 1].val >= seg[2 * i + 2].val)
+        seg[i] = seg[2 * i + 1];
+    else
+        seg[i] = seg[2 * i + 2];
+}
+void update(ll l, ll r, ll i, ll var, ll index, vector<node> &seg)
+{
+    if (l == r)
+    {
+        if (l == index)
+            seg[i].val = seg[i].val - var;
+        return;
+    }
+    if (index < l || index > r)
+        return;
+    ll mid = (l + r) >> 1;
+    update(l, mid, 2 * i + 1, var, index, seg);
+    update(mid + 1, r, 2 * i + 2, var, index, seg);
+    if (seg[2 * i + 1].val >= seg[2 * i + 2].val)
+        seg[i] = seg[2 * i + 1];
+    else
+        seg[i] = seg[2 * i + 2];
+}
+ll find(ll l, ll r, ll i, vector<node> &seg, ll val)
+{
+    if (l == r)
+    {
+        if (seg[i].val >= val)
+            return seg[i].ind;
+        return -1;
+    }
+    ll mid = (l + r) >> 1;
+    if (seg[2 * i + 1].val >= val)
+        return find(l, mid, 2 * i + 1, seg, val);
+    else
+        return find(mid + 1, r, 2 * i + 2, seg, val);
+}
 int main(int argc, char const *argv[])
 {
     fast_io;
     fast_io2;
     ll n, q;
     cin >> n >> q;
-   
-   
+    vector<ll> v(n);
+    for (auto &i : v)
+        cin >> i;
+    vector<node> seg(4 * n + 1);
+    build(0, n - 1, 0, v, seg);
+    while (q--)
+    {
+        ll x;
+        cin >> x;
+        ll ind = find(0, n - 1, 0, seg, x);
+        if (ind != -1)
+            update(0, n - 1, 0, x, ind, seg);
+        cout << ind + 1 << " ";
+    }
     return 0;
 }
