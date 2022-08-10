@@ -40,61 +40,61 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void dfs(ll u, ll par, vector<vector<ll>> &adj, vector<vector<ll>> &dp)
+void bfs(vector<vector<ll>> &adj, vector<ll> &dist, ll n, vector<ll> &p)
 {
-    bool leaf = true;
-    for (auto i : adj[u])
+    vector<ll> vis(n + 1, 0);
+    queue<ll> q;
+    dist[1] = 1;
+    q.push(1);
+    vis[1] = 1;
+    while (!q.empty())
     {
-        if (i != par)
+        ll t = q.front();
+        q.pop();
+        for (auto it : adj[t])
         {
-            leaf = false;
-            dfs(i, u, adj, dp);
+            if (vis[it] == 0)
+            {
+                dist[it] = 1 + dist[t];
+                q.push(it);
+                vis[it] = 1;
+                p[it] = t;
+            }
         }
-    }
-    if (leaf == true)
-        return;
-    vector<ll> pre, suff;
-    for (auto i : adj[u])
-    {
-        if (i == par)
-            continue;
-        pre.pb(max(dp[i][0], dp[i][1]));
-        suff.pb(max(dp[i][0], dp[i][1]));
-    }
-    ll n = pre.size();
-    for (ll i = 1; i < n; i++)
-        pre[i] += pre[i - 1];
-    for (ll i = n - 2; i >= 0; i--)
-        suff[i] += suff[i + 1];
-    ll c = 0;
-    dp[u][0] = suff[0];
-    for (auto i : adj[u])
-    {
-        if (i == par)
-            continue;
-        ll left = c == 0 ? 0 : pre[c - 1];
-        ll right = c == n - 1 ? 0 : suff[c + 1];
-        ll op = 1 + dp[i][0] + left + right;
-        dp[u][1] = max(dp[u][1], op);
-        c++;
     }
 }
 void solve()
 {
-    ll n;
-    cin >> n;
+    ll n, m;
+    cin >> n >> m;
     vector<vector<ll>> adj(n + 1);
-    for (ll i = 0; i < n - 1; i++)
+    vector<ll> p(n + 1);
+    for (ll i = 0; i < m; i++)
     {
         ll x, y;
         cin >> x >> y;
         adj[x].pb(y);
         adj[y].pb(x);
     }
-    vector<vector<ll>> dp(n + 1, vector<ll>(2, 0));
-    dfs(1, 0, adj, dp);
-    ll ans = max(dp[1][0], dp[1][1]);
-    cout << ans << nl;
+    vector<ll> dist(n + 1, inf);
+    bfs(adj, dist, n, p);
+    if (dist[n] == inf)
+    {
+        cout << "IMPOSSIBLE" << nl;
+        return;
+    }
+    ll k = dist[n];
+    vector<ll> ans(k + 1);
+    ll x = n;
+    for (ll i = k; i >= 0; i--)
+    {
+        ans[i] = x;
+        x = p[x];
+    }
+    cout << k << nl;
+    for (ll i = 1; i <= k; i++)
+        cout << ans[i] << " ";
+    cout << nl;
 }
 
 int main(int argc, char const *argv[])

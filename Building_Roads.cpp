@@ -39,62 +39,49 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void dfs(ll u, ll par, vector<vector<ll>> &adj, vector<vector<ll>> &dp)
+void dfs(ll node, vector<vector<ll>> &adj, vector<ll> &_cc, vector<bool> &vis, ll c)
 {
-    bool leaf = true;
-    for (auto i : adj[u])
+    vis[node] = true;
+    _cc[node] = c;
+    for (auto i : adj[node])
     {
-        if (i != par)
-        {
-            leaf = false;
-            dfs(i, u, adj, dp);
-        }
-    }
-    if (leaf == true)
-        return;
-    vector<ll> pre, suff;
-    for (auto i : adj[u])
-    {
-        if (i == par)
-            continue;
-        pre.pb(max(dp[i][0], dp[i][1]));
-        suff.pb(max(dp[i][0], dp[i][1]));
-    }
-    ll n = pre.size();
-    for (ll i = 1; i < n; i++)
-        pre[i] += pre[i - 1];
-    for (ll i = n - 2; i >= 0; i--)
-        suff[i] += suff[i + 1];
-    ll c = 0;
-    dp[u][0] = suff[0];
-    for (auto i : adj[u])
-    {
-        if (i == par)
-            continue;
-        ll left = c == 0 ? 0 : pre[c - 1];
-        ll right = c == n - 1 ? 0 : suff[c + 1];
-        ll op = 1 + dp[i][0] + left + right;
-        dp[u][1] = max(dp[u][1], op);
-        c++;
+        if (vis[i] == false)
+            dfs(i, adj, _cc, vis, c);
     }
 }
 void solve()
 {
-    ll n;
-    cin >> n;
+    ll n, m;
+    cin >> n >> m;
     vector<vector<ll>> adj(n + 1);
-    for (ll i = 0; i < n - 1; i++)
+    for (ll i = 0; i < m; i++)
     {
         ll x, y;
         cin >> x >> y;
         adj[x].pb(y);
         adj[y].pb(x);
     }
-    vector<vector<ll>> dp(n + 1, vector<ll>(2, 0));
-    dfs(1, 0, adj, dp);
-    ll ans = max(dp[1][0], dp[1][1]);
-    cout << ans << nl;
+    vector<ll> _cc(n + 1, 0);
+    vector<bool> vis(n + 1, false);
+    ll c = 0;
+    for (ll i = 1; i <= n; i++)
+    {
+        if (vis[i] == false)
+        {
+            c++;
+            dfs(i, adj, _cc, vis, c);
+        }
+    }
+    map<ll, ll> mp;
+    for (ll i = 1; i <= n; i++)
+        mp[_cc[i]] = i;
+    vector<ll> v;
+    for (auto i : mp)
+        v.pb(i.ss);
+    cout << c - 1 << nl;
+    ll x = v.size();
+    for (ll i = 0; i < x - 1; i++)
+        cout << v[i] << " " << v[i + 1] << nl;
 }
 
 int main(int argc, char const *argv[])

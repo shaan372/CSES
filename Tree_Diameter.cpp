@@ -39,44 +39,19 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void dfs(ll u, ll par, vector<vector<ll>> &adj, vector<vector<ll>> &dp)
+ll max_d = 0, node;
+void dfs(ll u, ll par, vector<vector<ll>> &adj, ll d)
 {
-    bool leaf = true;
+
     for (auto i : adj[u])
     {
         if (i != par)
-        {
-            leaf = false;
-            dfs(i, u, adj, dp);
-        }
+            dfs(i, u, adj, d + 1);
     }
-    if (leaf == true)
-        return;
-    vector<ll> pre, suff;
-    for (auto i : adj[u])
+    if (d > max_d)
     {
-        if (i == par)
-            continue;
-        pre.pb(max(dp[i][0], dp[i][1]));
-        suff.pb(max(dp[i][0], dp[i][1]));
-    }
-    ll n = pre.size();
-    for (ll i = 1; i < n; i++)
-        pre[i] += pre[i - 1];
-    for (ll i = n - 2; i >= 0; i--)
-        suff[i] += suff[i + 1];
-    ll c = 0;
-    dp[u][0] = suff[0];
-    for (auto i : adj[u])
-    {
-        if (i == par)
-            continue;
-        ll left = c == 0 ? 0 : pre[c - 1];
-        ll right = c == n - 1 ? 0 : suff[c + 1];
-        ll op = 1 + dp[i][0] + left + right;
-        dp[u][1] = max(dp[u][1], op);
-        c++;
+        max_d = d;
+        node = u;
     }
 }
 void solve()
@@ -84,17 +59,16 @@ void solve()
     ll n;
     cin >> n;
     vector<vector<ll>> adj(n + 1);
-    for (ll i = 0; i < n - 1; i++)
+    for (ll i = 1; i < n; i++)
     {
         ll x, y;
         cin >> x >> y;
         adj[x].pb(y);
         adj[y].pb(x);
     }
-    vector<vector<ll>> dp(n + 1, vector<ll>(2, 0));
-    dfs(1, 0, adj, dp);
-    ll ans = max(dp[1][0], dp[1][1]);
-    cout << ans << nl;
+    dfs(1, 0, adj, 0);
+    dfs(node, 0, adj, 0);
+    cout << max_d << nl;
 }
 
 int main(int argc, char const *argv[])
