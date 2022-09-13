@@ -52,17 +52,16 @@ bool isPrime(int n){if (n <= 1) return false; for (int i = 2; i < n; i++)if (n %
 
 /*-----------------------------------ACTUAL CODE STARTS HERE-----------------------------------------------------*/
 
-
-
 int main(int argc, char const *argv[])
 {
-fast_io;
-ll n;
-cin>>n;
-ll ans =1;
-f(i,0,n){
-    ans=((ans%M)*(2%M))%M;
-}
-cout<<ans%M<<nl;
-return 0;
+    fast_io;
+    ll n;
+    cin >> n;
+    ll ans = 1;
+    f(i, 0, n)
+    {
+        ans = ((ans % M) * (2 % M)) % M;
+    }
+    cout << ans % M << nl;
+    return 0;
 }

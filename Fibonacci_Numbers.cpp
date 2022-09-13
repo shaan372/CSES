@@ -40,35 +40,51 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+vector<vector<ll>> multiply(vector<vector<ll>> &a, vector<vector<ll>> &b)
+{
+    vector<vector<ll>> res(2, vector<ll>(2, 0));
+    for (ll i = 0; i < 2; i++)
+    {
+        for (ll j = 0; j < 2; j++)
+        {
+            for (ll k = 0; k < 2; k++)
+            {
+                res[i][j] += (a[i][k] % M * b[k][j] % M) % M;
+                res[i][j] %= M;
+            }
+        }
+    }
+    return res;
+}
+vector<vector<ll>> bin_expo(vector<vector<ll>> &v, ll p)
+{
+    vector<vector<ll>> res(2, vector<ll>(2, 0));
+    for (ll i = 0; i < 2; i++)
+        res[i][i] = 1;
+    while (p)
+    {
+        if (p & 1)
+            res = multiply(res, v);
+        v = multiply(v, v);
+        p >>= 1;
+    }
+    return res;
+}
 void run_case()
 {
     ll n;
     cin >> n;
-    vector<string> v(n);
-    for (auto &i : v)
-        cin >> i;
-    vector<vector<ll>> dp(n, vector<ll>(n, INT_MAX));
-    dp[0][0] = 1;
-    for (ll i = 0; i < n; i++)
+    if (n <= 1)
     {
-        for (ll j = 0; j < n; j++)
-        {
-            if (v[i][j] == '*')
-                dp[i][j] = 0;
-        }
+        cout << n << nl;
+        return;
     }
-    for (ll i = 0; i < n; i++)
-    {
-        for (ll j = 0; j < n; j++)
-        {
-            if (dp[i][j] == 0 || (i == 0 && j == 0))
-                continue;
-            ll op1 = (j == 0 ? 0 : dp[i][j - 1]);
-            ll op2 = (i == 0 ? 0 : dp[i - 1][j]);
-            dp[i][j] = (op1 % M + op2 % M) % M;
-        }
-    }
-    cout << dp[n - 1][n - 1] << nl;
+    vector<vector<ll>> v(2, vector<ll>(2, 1));
+    v[1][1] = 0;
+    n = n - 2;
+    v = bin_expo(v, n);
+    ll ans = (v[0][0] % M + v[0][1] % M) % M;
+    cout << ans << nl;
 }
 
 int main(int argc, char const *argv[])

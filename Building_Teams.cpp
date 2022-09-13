@@ -40,35 +40,71 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+bool check(vector<vector<ll>> &adj, vector<set<ll>> &st, vector<ll> &res, ll n)
+{
+    set<ll> v;
+    for (ll i = 1; i <= n; i++)
+    {
+        if (res[i] == 2)
+            v.insert(i);
+    }
+    for (auto it : v)
+    {
+        for (auto j : adj[it])
+        {
+            if (v.find(j) != v.end())
+                return false;
+        }
+    }
+    return true;
+}
 void run_case()
 {
-    ll n;
-    cin >> n;
-    vector<string> v(n);
-    for (auto &i : v)
-        cin >> i;
-    vector<vector<ll>> dp(n, vector<ll>(n, INT_MAX));
-    dp[0][0] = 1;
-    for (ll i = 0; i < n; i++)
+    ll n, q;
+    cin >> n >> q;
+    vector<vector<ll>> adj(n + 1);
+    for (ll i = 0; i < q; i++)
     {
-        for (ll j = 0; j < n; j++)
+        ll x, y;
+        cin >> x >> y;
+        adj[x].pb(y);
+        adj[y].pb(x);
+    }
+    vector<set<ll>> v(n + 1);
+    for (ll i = 1; i <= n; i++)
+    {
+        if (adj[i].size() == 0)
+            continue;
+        for (auto j : adj[i])
+            v[i].insert(j);
+    }
+    set<ll> ans;
+    ans.insert(1);
+    for (ll i = 2; i < n; i++)
+    {
+        for (auto j : ans)
         {
-            if (v[i][j] == '*')
-                dp[i][j] = 0;
+            if (v[i].find(j) == v[i].end())
+                ans.insert(i);
         }
     }
-    for (ll i = 0; i < n; i++)
+    vector<ll> res(n + 1, 2);
+    for (auto i : ans)
+        res[i] = 1;
+    vector<ll> t;
+    for (ll i = 1; i <= n; i++)
     {
-        for (ll j = 0; j < n; j++)
-        {
-            if (dp[i][j] == 0 || (i == 0 && j == 0))
-                continue;
-            ll op1 = (j == 0 ? 0 : dp[i][j - 1]);
-            ll op2 = (i == 0 ? 0 : dp[i - 1][j]);
-            dp[i][j] = (op1 % M + op2 % M) % M;
-        }
+        if (res[i] == 2)
+            t.pb(i);
     }
-    cout << dp[n - 1][n - 1] << nl;
+    if (check(adj, v, t, n) == false)
+    {
+        cout << "IMPOSSIBLE" << nl;
+        return;
+    }
+    for (ll i = 1; i <= n; i++)
+        cout << res[i] << " ";
+    cout << nl;
 }
 
 int main(int argc, char const *argv[])
