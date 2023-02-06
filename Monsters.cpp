@@ -39,119 +39,77 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
-int n, m;
- 
-vector<vector<pair<int, int>>> path;
-vector<vector<bool>> vis;
- 
-int sx, sy, ex, ey;
- 
-vector<pair<int, int>> moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
- 
-bool isValid(int x, int y)
+
+int fx[] = {-1, 1, 0, 0};
+int fy[] = {0, 0, 1, -1};
+char go[] = {'U', 'D', 'R', 'L'};
+int nex[1005][1005];
+void run_case()
 {
-    if (x < 0 or x >= n or y < 0 or y >= m)
-        return false;
-    if (vis[x][y])
-        return false;
-    return true;
-}
- 
-void bfs()
-{
+    int n, m;
+    cin >> n >> m;
+    vector<string> grid(n);
+    for (auto &i : grid)
+        cin >> i;
     queue<pair<int, int>> q;
-    q.push({sx, sy});
+    int x, y;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            if (grid[i][j] == 'M')
+                q.push({i, j});
+            else if (grid[i][j] == 'A')
+                x = i, y = j;
+    q.push({x, y});
+    nex[x][y] = -1;
     while (!q.empty())
     {
-        int cx = q.front().first;
-        int cy = q.front().second;
+        auto [x, y] = q.front();
         q.pop();
-        for (auto mv : moves)
+        if (grid[x][y] == 'A' && (x == 0 || x == n - 1 || y == 0 || y == m - 1))
         {
-            int mvx = mv.first;
-            int mvy = mv.second;
-            if (isValid(cx + mvx, cy + mvy))
+            cout << "YES" << endl;
+            string ans;
+            int d = nex[x][y];
+            while (d != -1)
             {
-                q.push({cx + mvx, cy + mvy});
-                vis[cx + mvx][cy + mvy] = true;
-                path[cx + mvx][cy + mvy] = {mvx, mvy};
+                ans += go[d];
+                x -= fx[d];
+                y -= fy[d];
+                d = nex[x][y];
+            }
+            reverse(ans.begin(), ans.end());
+            cout << ans.size() << endl;
+            cout << ans;
+            return;
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            int xx = x + fx[i],
+                yy = y + fy[i];
+            if (xx < 0 || xx >= n || yy < 0 || yy >= m || grid[xx][yy] != '.')
+                continue;
+            else
+            {
+                grid[xx][yy] = grid[x][y];
+                if (grid[xx][yy] == 'A')
+                    nex[xx][yy] = i;
+                q.push({xx, yy});
             }
         }
     }
+    cout << "NO";
 }
+
 int main(int argc, char const *argv[])
 {
     fast_io;
-    cin >> n >> m;
-    path.resize(n);
-    vis.resize(n);
-    for (int i = 0; i < n; ++i)
+    fast_io2;
+    ll t = 1;
+    // cin >> t;
+    for (ll i = 1; i <= t; i++)
     {
-        path[i].resize(m);
-        vis[i].resize(m);
-    }
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j < m; ++j)
-        {
-            path[i][j] = {-1, -1};
-            char c;
-            cin >> c;
-            if (c == '#')
-            {
-                vis[i][j] = true;
-            }
-            if (c == 'A')
-            {
-                sx = i;
-                sy = j;
-            }
-            if (c == 'B')
-            {
-                ex = i;
-                ey = j;
-            }
-        }
-    }
-    bfs();
- 
-    if (!vis[ex][ey])
-    {
-        cout << "NO" << endl;
-        return 0;
-    }
-    cout << "YES" << endl;
- 
-    vector<pair<int, int>> ans;
-    pair<int, int> end = {ex, ey};
- 
-    while (end.first != sx or end.second != sy)
-    {
-        ans.push_back(path[end.first][end.second]);
-        end.first -= ans.back().first;
-        end.second -= ans.back().second;
-    }
- 
-    reverse(ans.begin(), ans.end());
-    cout << ans.size() << endl;
-    for (auto c : ans)
-    {
-        if (c.first == 1 and c.second == 0)
-        {
-            cout << 'D';
-        }
-        else if (c.first == -1 and c.second == 0)
-        {
-            cout << 'U';
-        }
-        else if (c.first == 0 and c.second == 1)
-        {
-            cout << 'R';
-        }
-        else if (c.first == 0 and c.second == -1)
-        {
-            cout << 'L';
-        }
+        // google_case(i);
+        run_case();
     }
     return 0;
 }

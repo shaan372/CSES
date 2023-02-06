@@ -39,119 +39,92 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
-int n, m;
- 
-vector<vector<pair<int, int>>> path;
-vector<vector<bool>> vis;
- 
-int sx, sy, ex, ey;
- 
-vector<pair<int, int>> moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
- 
-bool isValid(int x, int y)
+
+const ll max_n = 8e5 + 10;
+ll seg[max_n] = {0};
+void build(ll l, ll r, ll i, vector<ll> &v)
 {
-    if (x < 0 or x >= n or y < 0 or y >= m)
-        return false;
-    if (vis[x][y])
-        return false;
-    return true;
-}
- 
-void bfs()
-{
-    queue<pair<int, int>> q;
-    q.push({sx, sy});
-    while (!q.empty())
+    if (l == r)
     {
-        int cx = q.front().first;
-        int cy = q.front().second;
-        q.pop();
-        for (auto mv : moves)
+        seg[i] = v[l];
+        return;
+    }
+    ll mid = (l + r) >> 1;
+    build(l, mid, 2 * i + 1, v);
+    build(mid + 1, r, 2 * i + 2, v);
+    seg[i] = seg[2 * i + 1] + seg[2 * i + 2];
+}
+void update(ll i, ll l, ll r, ll ind, ll val)
+{
+    if (l == r)
+    {
+        if (l == ind)
+            seg[i] += val;
+        return;
+    }
+    if (ind < l || ind > r)
+        return;
+    ll mid = (l + r) >> 1;
+    update(2 * i + 1, l, mid, ind, val);
+    update(2 * i + 2, mid + 1, r, ind, val);
+    seg[i] = seg[2 * i + 1] + seg[2 * i + 2];
+}
+ll sum(ll i, ll l, ll r, ll low, ll high)
+{
+    if (l >= low && r <= high)
+        return seg[i];
+    if (l > high || r < low)
+        return 0;
+    ll mid = (l + r) >> 1;
+    ll left = sum(2 * i + 1, l, mid, low, high);
+    ll right = sum(2 * i + 2, mid + 1, r, low, high);
+    ll ans = left + right;
+    return ans;
+}
+void run_case()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<ll> v(n + 1, 0);
+    for (ll i = 0; i < n; i++)
+    {
+        ll x;
+        cin >> x;
+        v[i] += x;
+        v[i + 1] -= x;
+    }
+    build(0, n - 1, 0, v);
+    while (q--)
+    {
+        ll t;
+        cin >> t;
+        if (t == 1)
         {
-            int mvx = mv.first;
-            int mvy = mv.second;
-            if (isValid(cx + mvx, cy + mvy))
-            {
-                q.push({cx + mvx, cy + mvy});
-                vis[cx + mvx][cy + mvy] = true;
-                path[cx + mvx][cy + mvy] = {mvx, mvy};
-            }
+            ll l, r, u;
+            cin >> l >> r >> u;
+            update(0, 0, n - 1, l - 1, u);
+            update(0, 0, n - 1, r, -u);
+        }
+        else
+        {
+            ll k;
+            cin >> k;
+            ll ans = sum(0, 0, n - 1, 0, k - 1);
+            cout << ans << nl;
         }
     }
 }
+
 int main(int argc, char const *argv[])
 {
     fast_io;
-    cin >> n >> m;
-    path.resize(n);
-    vis.resize(n);
-    for (int i = 0; i < n; ++i)
+    fast_io2;
+    ll t = 1;
+    // cin >> t;
+    for (ll i = 1; i <= t; i++)
     {
-        path[i].resize(m);
-        vis[i].resize(m);
-    }
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j < m; ++j)
-        {
-            path[i][j] = {-1, -1};
-            char c;
-            cin >> c;
-            if (c == '#')
-            {
-                vis[i][j] = true;
-            }
-            if (c == 'A')
-            {
-                sx = i;
-                sy = j;
-            }
-            if (c == 'B')
-            {
-                ex = i;
-                ey = j;
-            }
-        }
-    }
-    bfs();
- 
-    if (!vis[ex][ey])
-    {
-        cout << "NO" << endl;
-        return 0;
-    }
-    cout << "YES" << endl;
- 
-    vector<pair<int, int>> ans;
-    pair<int, int> end = {ex, ey};
- 
-    while (end.first != sx or end.second != sy)
-    {
-        ans.push_back(path[end.first][end.second]);
-        end.first -= ans.back().first;
-        end.second -= ans.back().second;
-    }
- 
-    reverse(ans.begin(), ans.end());
-    cout << ans.size() << endl;
-    for (auto c : ans)
-    {
-        if (c.first == 1 and c.second == 0)
-        {
-            cout << 'D';
-        }
-        else if (c.first == -1 and c.second == 0)
-        {
-            cout << 'U';
-        }
-        else if (c.first == 0 and c.second == 1)
-        {
-            cout << 'R';
-        }
-        else if (c.first == 0 and c.second == -1)
-        {
-            cout << 'L';
-        }
+        // google_case(i);
+        run_case();
     }
     return 0;
 }

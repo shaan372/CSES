@@ -39,119 +39,59 @@ vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------*/
-int n, m;
- 
-vector<vector<pair<int, int>>> path;
-vector<vector<bool>> vis;
- 
-int sx, sy, ex, ey;
- 
-vector<pair<int, int>> moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
- 
-bool isValid(int x, int y)
+
+void run_case()
 {
-    if (x < 0 or x >= n or y < 0 or y >= m)
-        return false;
-    if (vis[x][y])
-        return false;
-    return true;
-}
- 
-void bfs()
-{
-    queue<pair<int, int>> q;
-    q.push({sx, sy});
-    while (!q.empty())
+    ll n, m;
+    cin >> n >> m;
+    vector<vector<pair<ll, ll>>> adj(n + 1);
+    for (ll i = 0; i < m; i++)
     {
-        int cx = q.front().first;
-        int cy = q.front().second;
-        q.pop();
-        for (auto mv : moves)
+        ll u, v, wt;
+        cin >> u >> v >> wt;
+        adj[u].pb({v, wt});
+    }
+    vector<ll> dist(n + 1, inf);
+    vector<ll> vis(n + 1, 0);
+    minheap<pair<ll, ll>> pq;
+    pq.push({0, 1});
+    dist[1] = 0;
+    while (!pq.empty())
+    {
+        auto p = pq.top();
+        pq.pop();
+        ll d = p.ff;
+        ll u = p.ss;
+        if (vis[u] == 1)
+            continue;
+        vis[u] = 1;
+        for (auto i : adj[u])
         {
-            int mvx = mv.first;
-            int mvy = mv.second;
-            if (isValid(cx + mvx, cy + mvy))
+            ll v = i.ff;
+            ll x = i.ss;
+            if (vis[v] == 1)
+                continue;
+            if (x + d < dist[v])
             {
-                q.push({cx + mvx, cy + mvy});
-                vis[cx + mvx][cy + mvy] = true;
-                path[cx + mvx][cy + mvy] = {mvx, mvy};
+                dist[v] = x + d;
+                pq.push({dist[v], v});
             }
         }
     }
+    for (ll i = 1; i <= n; i++)
+        cout << dist[i] << " ";
 }
+
 int main(int argc, char const *argv[])
 {
     fast_io;
-    cin >> n >> m;
-    path.resize(n);
-    vis.resize(n);
-    for (int i = 0; i < n; ++i)
+    fast_io2;
+    ll t = 1;
+    // cin >> t;
+    for (ll i = 1; i <= t; i++)
     {
-        path[i].resize(m);
-        vis[i].resize(m);
-    }
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j < m; ++j)
-        {
-            path[i][j] = {-1, -1};
-            char c;
-            cin >> c;
-            if (c == '#')
-            {
-                vis[i][j] = true;
-            }
-            if (c == 'A')
-            {
-                sx = i;
-                sy = j;
-            }
-            if (c == 'B')
-            {
-                ex = i;
-                ey = j;
-            }
-        }
-    }
-    bfs();
- 
-    if (!vis[ex][ey])
-    {
-        cout << "NO" << endl;
-        return 0;
-    }
-    cout << "YES" << endl;
- 
-    vector<pair<int, int>> ans;
-    pair<int, int> end = {ex, ey};
- 
-    while (end.first != sx or end.second != sy)
-    {
-        ans.push_back(path[end.first][end.second]);
-        end.first -= ans.back().first;
-        end.second -= ans.back().second;
-    }
- 
-    reverse(ans.begin(), ans.end());
-    cout << ans.size() << endl;
-    for (auto c : ans)
-    {
-        if (c.first == 1 and c.second == 0)
-        {
-            cout << 'D';
-        }
-        else if (c.first == -1 and c.second == 0)
-        {
-            cout << 'U';
-        }
-        else if (c.first == 0 and c.second == 1)
-        {
-            cout << 'R';
-        }
-        else if (c.first == 0 and c.second == -1)
-        {
-            cout << 'L';
-        }
+        // google_case(i);
+        run_case();
     }
     return 0;
 }

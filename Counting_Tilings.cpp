@@ -1,93 +1,93 @@
 #include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 
 #define ll long long
-#define vi vector<ll>
-#define gi greater<ll>
-#define maxheap priority_queue<ll>
-#define minheap priority_queue<ll, vector<ll>, greater<ll>>
+#define ull unsigned long long
 #define pb push_back
-#define eb emplace_back
+#define ppb pop_back
 #define ff first
 #define ss second
-#define mp make_pair
-#define pii pair<ll, ll>
-#define spi set<pii>
-#define si set<int>
-#define mpci map<char, ll>
-#define mpii map<ll, ll>
-#define f(i,a,n) for(ll i=a;i<n;i++)
-#define fi(i,n,a) for(ll i=n-1;i>=0;i--)
+
 #define all(x) (x).begin(), (x).end()
 #define prDouble(x,y) cout << fixed << setprecision(y) << x
 #define fast_io ios_base::sync_with_stdio(false);cin.tie(NULL)
 #define fast_io2 cin.exceptions(cin.failbit);
 #define M 1000000007
-#define inf 1e18
+#define inf 1000000000000000005
 #define MOD 998244353
 #define nl endl
 
 using namespace std;
+using namespace __gnu_pbds;
 
+template <class T> using maxheap = priority_queue<T>;
+template <class T> using minheap = priority_queue<T, vector<T>, greater<T>>;
+template <class T, class V = less<T>> using pbds = tree<T, null_type, V, rb_tree_tag, tree_order_statistics_node_update>; //find_by_order, order_of_key
 
-/*------------------------------------SOME BASIC FUNCTION--------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------------------------------*/
 
-ll sumofdigit(ll n){ll s = 0;while (n > 0){ll r = n % 10;s += r;n = n / 10;}return s;}
-ll gcd(ll a, ll b){if (b % a == 0){return a;}else{return gcd(b % a, a);}}
-ll POW(ll x, ll y){ll ans=1;for(ll i=0;i<y;i++){ans=ans*x;}return ans;}
-ll ndigit(ll n){ll s=0;while(n>0){s++;n=n/10;}return s;}
-ll arraysum(ll a[], ll n){ll s = 0;f(i, 0, n){s = s + a[i];}return s;}
+void google_case(ll i){cout<<"Case #"<<i<<": ";}
 ll expo(ll a, ll b, ll mod) {ll res = 1; while (b > 0) {if (b & 1)res = (res * a) % mod; a = (a * a) % mod; b = b >> 1;} return res;}
-void extendgcd(ll a, ll b, ll*v) {if (b == 0) {v[0] = 1; v[1] = 0; v[2] = a; return ;} extendgcd(b, a % b, v); ll x = v[1]; v[1] = v[0] - v[1] * (a / b); v[0] = x; return;} //pass an arry of size1 3
-ll mminv(ll a, ll b) {ll arr[3]; extendgcd(a, b, arr); return arr[0];} //for non prime b
-ll mminvprime(ll a, ll b) {return expo(a, b - 2, b);}
-ll mod_add(ll a, ll b, ll m) {a = a % m; b = b % m; return (((a + b) % m) + m) % m;}
-ll mod_mul(ll a, ll b, ll m) {a = a % m; b = b % m; return (((a * b) % m) + m) % m;}
-ll mod_sub(ll a, ll b, ll m) {a = a % m; b = b % m; return (((a - b) % m) + m) % m;}
-ll mod_div(ll a, ll b, ll m) {a = a % m; b = b % m; return (mod_mul(a, mminvprime(b, m), m) + m) % m;}
-ll phin(ll n) {ll number = n; if (n % 2 == 0) {number /= 2; while (n % 2 == 0) n /= 2;} for (ll i = 3; i <= sqrt(n); i += 2) {if (n % i == 0) {while (n % i == 0)n /= i; number = (number / i * (i - 1));}} if (n > 1)number = (number / n * (n - 1)) ; return number;}//O(sqrt(N))
-bool isPrime(int n){if (n <= 1) return false; for (int i = 2; i < n; i++)if (n % i == 0) return false; return true;}
+ll inv(ll n, ll m) {ll res = expo(n, m-2, m); return res;}
+ll mod_add(ll a, ll b, ll m){ll res = (a % m + b % m) % m;return res;}
+ll mod_mul(ll a, ll b, ll m){ll res = (a % m * b % m) % m;return res;}
+ll mod_sub(ll a, ll b, ll m){ll res = (a % m - b % m + m) % m;return res;}
+bool isPrime(ll n){if (n <= 1) return false; for (ll i = 2; i < n; i++)if (n % i == 0) return false; return true;}
+ll fast_mul(ll x, ll y){if (x == 0) return 0; else if (x % 2 == 1) return (fast_mul(x >> 1, y << 1) + y); else return fast_mul(x >> 1, y << 1);}
+vector<ll> sieve(ll n){vector<bool> is_prime(n + 1, true);is_prime[0] = is_prime[1] = false;for (ll i = 2; i <= n; i++){if (is_prime[i] && i * i <= n){for (int j = i * i; j <= n; j += i)is_prime[j] = false;}}vector<ll> ans;for (ll i = 0; i <= n; i++){if (is_prime[i])ans.pb(i);}return ans;}
 
+/*------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------------------------------------------*/
-
-
-/*-----------------------------------ACTUAL CODE STARTS HERE-----------------------------------------------------*/
-
-ll dp[1003][1030], n, m;
-const int md = 1e9 + 7;
-
-void solve(ll x = 0, ll y = 0, ll mask = 0, ll next_mask = 0)
+ll dp[1003][1 << 11];
+void generate(ll i, ll curr, ll next, vector<ll> &ans, ll n)
 {
-    if (x == n)
-        return;
-    if (y >= m)
-        (dp[x + 1][next_mask] += dp[x][mask]) %= md;
-    else
+    if (i == n)
     {
-        ll my_mask = 1 << y;
-        if (mask & my_mask)
-            solve(x, y + 1, mask, next_mask);
-        else
-        {
-            solve(x, y + 1, mask, next_mask | my_mask);
-            if (y + 1 < m && !(mask & (my_mask << 1)))
-                solve(x, y + 2, mask, next_mask);
-        }
+        ans.pb(next);
+        return;
     }
+    if (curr & (1 << i))
+        generate(i + 1, curr, next, ans, n);
+    if (!(curr & (1 << i)))
+        generate(i + 1, curr, next + (1 << i), ans, n);
+    if (i + 1 < n && !(curr & (1 << i)) && !(curr & (1 << (i + 1))))
+        generate(i + 2, curr, next, ans, n);
 }
+ll solve(ll i, ll mask, ll m, ll n)
+{
+    if (i == m)
+        return mask == 0;
+    if (dp[i][mask] != -1)
+        return dp[i][mask];
+    vector<ll> v;
+    generate(0, mask, 0, v, n);
+    ll ans = 0;
+    for (auto j : v)
+        ans = mod_add(ans, solve(i + 1, j, m, n), M);
+    dp[i][mask] = ans;
+    return ans;
+}
+void run_case()
+{
+    ll n, m;
+    cin >> n >> m;
+    memset(dp, -1, sizeof(dp));
+    ll ans = solve(0, 0, m, n);
+    cout << ans << nl;
+}
+
 int main(int argc, char const *argv[])
 {
     fast_io;
     fast_io2;
-    cin >> m >> n;
-    dp[0][0] = 1;
-    for (ll i = 0; i < n; i++)
+    ll t = 1;
+    // cin >> t;
+    for (ll i = 1; i <= t; i++)
     {
-        for (ll j = 0; j < (1 << m); j++)
-        {
-            solve(i, 0, j, 0);
-        }
+        // google_case(i);
+        run_case();
     }
-    cout << dp[n][0];
     return 0;
 }
